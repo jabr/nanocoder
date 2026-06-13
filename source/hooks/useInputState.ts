@@ -66,23 +66,12 @@ export function useInputState() {
 
 	// Update input with paste detection and atomic deletion
 	const updateInput = useCallback(
-		(newInput: string, options?: {skipPasteDetection?: boolean}) => {
+		(newInput: string) => {
 			// First, check for atomic deletion (placeholder removal)
 			const atomicDeletionResult = handleAtomicDeletion(currentState, newInput);
 			if (atomicDeletionResult) {
 				// Atomic deletion occurred - apply it
 				pushToUndoStack(atomicDeletionResult);
-				return;
-			}
-
-			// Bypass paste detection for manual insertions (e.g. newline key binding)
-			if (options?.skipPasteDetection) {
-				pushToUndoStack({
-					displayValue: newInput,
-					placeholderContent: currentState.placeholderContent,
-				});
-				pasteDetectorRef.current.updateState(newInput);
-				lastPasteIdRef.current = null;
 				return;
 			}
 

@@ -1,8 +1,6 @@
 import chalk from 'chalk';
 import {Text, useInput} from 'ink';
 import {useEffect, useState} from 'react';
-import {useKeyBindings} from '@/hooks/useKeyBindings';
-import {findAction} from '@/utils/key-binding';
 import {wrapWithTrimmedContinuations} from '@/utils/text-wrapping';
 
 export type Props = {
@@ -28,7 +26,6 @@ function TextInput({
 	onSubmit,
 	wrapWidth,
 }: Props) {
-	const keyBindings = useKeyBindings();
 	const [state, setState] = useState({
 		cursorOffset: (originalValue || '').length,
 		cursorWidth: 0,
@@ -44,7 +41,7 @@ function TextInput({
 
 			const newValue = originalValue || '';
 
-			if (newValue.endsWith('\n') || previousState.cursorOffset >= newValue.length) {
+			if (previousState.cursorOffset > newValue.length - 1) {
 				return {
 					cursorOffset: newValue.length,
 					cursorWidth: 0,
@@ -86,30 +83,23 @@ function TextInput({
 
 	useInput(
 		(input, key) => {
+			// Swallow keys that UserInput handles or that should never insert
+			// characters. UserInput's useInput fires separately for these.
 			if (
 				key.upArrow ||
 				key.downArrow ||
 				(key.ctrl && input === 'c') ||
-				key.tab ||
-				(key.shift && key.tab) ||
-				(key.shift && key.return)
+				key.tab
 			) {
 				return;
 			}
 
-			const action = findAction(keyBindings, input, key);
-			if (action === 'submit') {
+			// Enter: call onSubmit if provided (used by question-prompt, wizards, etc.)
+			// UserInput handles its own submit/newline via findAction and doesn't pass onSubmit.
+			if (key.return) {
 				if (onSubmit) {
 					onSubmit(originalValue);
 				}
-
-				return;
-			}
-
-			// If findAction matched any other configured binding (newline,
-			// toggleMode, etc.), let UserInput's handler own it — don't
-			// process the key here.
-			if (action !== null) {
 				return;
 			}
 

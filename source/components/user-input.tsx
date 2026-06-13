@@ -93,6 +93,11 @@ export default function UserInput({
 		setInputState,
 	} = inputState;
 
+	const appendNewline = useCallback(() => {
+		updateInput(input + '\n');
+		setTextInputKey(prev => prev + 1);
+	}, [input, updateInput]);
+
 	const {
 		showClearMessage,
 		showCompletions,
@@ -436,6 +441,10 @@ export default function UserInput({
 			onToggleReasoningExpanded();
 			return;
 		}
+		if (action === 'submit') {
+			handleSubmit();
+			return;
+		}
 
 		// Block all other input when disabled
 		if (disabled) {
@@ -462,17 +471,17 @@ export default function UserInput({
 
 		// Newline bindings: insert a newline character at cursor position
 		if (action === 'newline' || action === 'newlineAlt') {
-			updateInput(input + '\n', {skipPasteDetection: true});
+			appendNewline();
 			return;
 		}
 		// Also handle literal LF character (some terminals send this for Ctrl+J)
 		if (inputChar === '\n' && !key.return) {
-			updateInput(input + '\n', {skipPasteDetection: true});
+			appendNewline();
 			return;
 		}
 		// Fallback: shift+enter always inserts newline if not bound to any action
 		if (action === null && key.shift && key.return) {
-			updateInput(input + '\n', {skipPasteDetection: true});
+			appendNewline();
 			return;
 		}
 
@@ -564,7 +573,6 @@ export default function UserInput({
 						key={textInputKey}
 						value={input}
 						onChange={updateInput}
-						onSubmit={handleSubmit}
 						placeholder="/ commands, ! bash, ↑/↓ history"
 						focus={isFocused}
 						wrapWidth={boxWidth - 3}
