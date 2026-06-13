@@ -61,14 +61,6 @@ export function parseKeyCombo(combo: string): ParsedCombo {
 		throw new Error(`Invalid key combo "${combo}": "${baseKey}" is a modifier, not a key`);
 	}
 
-	// Reject ctrl+shift+<letter> (terminal ambiguity)
-	if (modifiers.ctrl && modifiers.shift && baseKey.length === 1 && /[a-z]/.test(baseKey)) {
-		throw new Error(
-			`Invalid key combo "${combo}": ctrl+shift+<letter> is ambiguous in terminals. ` +
-			`Both ctrl+o and ctrl+shift+o produce the same control character.`,
-		);
-	}
-
 	// Normalize base key name
 	const normalizedBase = SPECIAL_KEY_MAP[baseKey] ?? baseKey;
 

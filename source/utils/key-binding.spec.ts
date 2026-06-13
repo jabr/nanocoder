@@ -60,9 +60,9 @@ test('parseKeyCombo: parses alt+f', t => {
 	t.deepEqual(result, {ctrl: false, shift: false, alt: true, meta: false, baseKey: 'f'});
 });
 
-test('parseKeyCombo: rejects ctrl+shift+letter', t => {
-	const error = t.throws(() => parseKeyCombo('ctrl+shift+a'));
-	t.true(error?.message.includes('ambiguous'));
+test('parseKeyCombo: parses ctrl+shift+letter', t => {
+	const result = parseKeyCombo('ctrl+shift+a');
+	t.deepEqual(result, {ctrl: true, shift: true, alt: false, meta: false, baseKey: 'a'});
 });
 
 test('parseKeyCombo: rejects empty string', t => {
