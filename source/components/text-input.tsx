@@ -83,21 +83,23 @@ function TextInput({
 
 	useInput(
 		(input, key) => {
+			// Swallow keys that UserInput handles or that should never insert
+			// characters. UserInput's useInput fires separately for these.
 			if (
 				key.upArrow ||
 				key.downArrow ||
 				(key.ctrl && input === 'c') ||
-				key.tab ||
-				(key.shift && key.tab)
+				key.tab
 			) {
 				return;
 			}
 
+			// Enter: call onSubmit if provided (used by question-prompt, wizards, etc.)
+			// UserInput handles its own submit/newline via findAction and doesn't pass onSubmit.
 			if (key.return) {
 				if (onSubmit) {
 					onSubmit(originalValue);
 				}
-
 				return;
 			}
 
@@ -174,6 +176,28 @@ function TextInput({
 						break;
 					}
 
+					case 'd': {
+						// Forward delete: remove character after cursor
+						if (cursorOffset < originalValue.length) {
+							nextValue =
+								originalValue.slice(0, cursorOffset) +
+								originalValue.slice(cursorOffset + 1);
+						}
+						break;
+					}
+
+					case 'h':
+					case 'backspace': {
+						// Backward delete
+						if (cursorOffset > 0) {
+							nextValue =
+								originalValue.slice(0, cursorOffset - 1) +
+								originalValue.slice(cursorOffset);
+							nextCursorOffset--;
+						}
+						break;
+					}
+
 					default:
 						// Ignore all other ctrl combinations (don't insert characters)
 						break;
@@ -186,11 +210,12 @@ function TextInput({
 				if (showCursor) {
 					nextCursorOffset++;
 				}
-			} else if (key.backspace || key.delete) {
+			} else if (key.delete || key.backspace) {
+				// Backward delete (Mac "delete", backspace, ctrl+h via key.backspace)
 				if (cursorOffset > 0) {
 					nextValue =
 						originalValue.slice(0, cursorOffset - 1) +
-						originalValue.slice(cursorOffset, originalValue.length);
+						originalValue.slice(cursorOffset);
 					nextCursorOffset--;
 				}
 			} else {

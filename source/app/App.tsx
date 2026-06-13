@@ -31,6 +31,8 @@ import {useAppInitialization} from '@/hooks/useAppInitialization';
 import {useAppState} from '@/hooks/useAppState';
 import {useContextPercentage} from '@/hooks/useContextPercentage';
 import {useDirectoryTrust} from '@/hooks/useDirectoryTrust';
+import {KeyBindingsContext} from '@/hooks/useKeyBindings';
+import {DEFAULT_KEY_BINDINGS} from '@/types/config';
 import {useModeHandlers} from '@/hooks/useModeHandlers';
 import {useNonInteractiveMode} from '@/hooks/useNonInteractiveMode';
 import {useNotifications} from '@/hooks/useNotifications';
@@ -591,22 +593,25 @@ export default function App({
 		<ThemeContext.Provider value={themeContextValue}>
 			<TitleShapeContext.Provider value={titleShapeContextValue}>
 				<UIStateProvider>
-					<InteractiveApp
-						appState={appState}
-						chatHandler={chatHandler}
-						modeHandlers={modeHandlers}
-						appHandlers={appHandlers}
-						vscodeServer={vscodeServer}
-						staticComponents={staticComponents}
-						liveComponent={liveComponent}
-						pendingSubagentApproval={pendingSubagentApproval}
-						handleSubagentToolApproval={handleSubagentToolApproval}
-						pendingToolConfirmation={pendingToolConfirmation}
-						handleToolConfirmation={handleToolConfirmation}
-						handleQuestionAnswer={handleQuestionAnswer}
-						handleUserSubmit={handleUserSubmit}
-						handleIdeSelect={handleIdeSelect}
-					/>
+					<KeyBindingsContext.Provider value={getAppConfig().keyBindings ?? DEFAULT_KEY_BINDINGS}>
+						<InteractiveApp
+							appState={appState}
+							chatHandler={chatHandler}
+							modeHandlers={modeHandlers}
+							appHandlers={appHandlers}
+							vscodeServer={vscodeServer}
+							staticComponents={staticComponents}
+							liveComponent={liveComponent}
+							pendingSubagentApproval={pendingSubagentApproval}
+							handleSubagentToolApproval={handleSubagentToolApproval}
+							pendingToolConfirmation={pendingToolConfirmation}
+							handleToolConfirmation={handleToolConfirmation}
+							handleQuestionAnswer={handleQuestionAnswer}
+							handleUserSubmit={handleUserSubmit}
+							handleIdeSelect={handleIdeSelect}
+							onExit={handleExit}
+						/>
+					</KeyBindingsContext.Provider>
 				</UIStateProvider>
 			</TitleShapeContext.Provider>
 		</ThemeContext.Provider>

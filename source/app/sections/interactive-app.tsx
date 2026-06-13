@@ -29,6 +29,7 @@ interface InteractiveAppProps {
 	handleQuestionAnswer: (answer: string) => void;
 	handleUserSubmit: (message: string, displayValue: string) => Promise<void>;
 	handleIdeSelect: (ide: string) => void;
+	onExit: () => void;
 }
 
 /**
@@ -52,6 +53,7 @@ export function InteractiveApp({
 	handleQuestionAnswer,
 	handleUserSubmit,
 	handleIdeSelect,
+	onExit,
 }: InteractiveAppProps): React.ReactElement {
 	const handleToggleCompactDisplay = () => {
 		const expanding = appState.compactToolDisplay;
@@ -195,6 +197,8 @@ export function InteractiveApp({
 						onDismissActiveEditor={vscodeServer.dismissActiveEditor}
 						onToggleMode={appHandlers.handleToggleDevelopmentMode}
 						onToggleReasoningExpanded={handleToggleReasoningExpanded}
+						onExit={onExit}
+						onOpenModelSelector={modeHandlers.enterModelSelectionMode}
 						tune={appState.tune}
 						currentModel={appState.currentModel}
 					/>
