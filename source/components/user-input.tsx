@@ -42,6 +42,7 @@ interface ChatProps {
 	activeEditor?: ActiveEditorState | null; // VS Code active file + optional selection
 	onDismissActiveEditor?: () => void; // Dismiss the active editor pill on clear/escape
 	onExit?: () => void; // Exit the application
+	onOpenModelSelector?: () => void; // Open the model selector
 }
 
 export default function UserInput({
@@ -63,6 +64,7 @@ export default function UserInput({
 	activeEditor,
 	onDismissActiveEditor,
 	onExit,
+	onOpenModelSelector,
 }: ChatProps) {
 	const {isFocused, focus} = useFocus({autoFocus: !disabled, id: 'user-input'});
 	const {colors} = useTheme();
@@ -450,6 +452,10 @@ export default function UserInput({
 		}
 		if (action === 'exit' && onExit) {
 			onExit();
+			return;
+		}
+		if (action === 'openModelSelector' && onOpenModelSelector) {
+			onOpenModelSelector();
 			return;
 		}
 

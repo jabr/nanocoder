@@ -77,6 +77,9 @@ export interface ChatInputProps {
 
 	// Exit the application
 	onExit?: () => void;
+
+	// Open the model selector
+	onOpenModelSelector?: () => void;
 }
 
 /**
@@ -123,6 +126,7 @@ export function ChatInput({
 	activeEditor,
 	onDismissActiveEditor,
 	onExit,
+	onOpenModelSelector,
 }: ChatInputProps): React.ReactElement {
 	const {colors} = useTheme();
 
@@ -190,6 +194,7 @@ export function ChatInput({
 					activeEditor={activeEditor}
 					onDismissActiveEditor={onDismissActiveEditor}
 					onExit={onExit}
+					onOpenModelSelector={onOpenModelSelector}
 				/>
 			) : /* Client Missing */
 			mcpInitialized && !client ? (

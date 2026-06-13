@@ -198,6 +198,7 @@ export function InteractiveApp({
 						onToggleMode={appHandlers.handleToggleDevelopmentMode}
 						onToggleReasoningExpanded={handleToggleReasoningExpanded}
 						onExit={onExit}
+						onOpenModelSelector={modeHandlers.enterModelSelectionMode}
 						tune={appState.tune}
 						currentModel={appState.currentModel}
 					/>
