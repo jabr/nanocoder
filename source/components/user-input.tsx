@@ -41,6 +41,7 @@ interface ChatProps {
 	currentModel?: string; // Active model id — resolves the 'auto' tune profile for display
 	activeEditor?: ActiveEditorState | null; // VS Code active file + optional selection
 	onDismissActiveEditor?: () => void; // Dismiss the active editor pill on clear/escape
+	onExit?: () => void; // Exit the application
 }
 
 export default function UserInput({
@@ -61,6 +62,7 @@ export default function UserInput({
 	currentModel,
 	activeEditor,
 	onDismissActiveEditor,
+	onExit,
 }: ChatProps) {
 	const {isFocused, focus} = useFocus({autoFocus: !disabled, id: 'user-input'});
 	const {colors} = useTheme();
@@ -427,6 +429,11 @@ export default function UserInput({
 			}
 		}
 
+		// Text editor ctrl sequences: skip when input has text (TextInput handles them)
+		if (key.ctrl && 'abdefhkuw'.includes(inputChar) && input.length > 0) {
+			return;
+		}
+
 		// Check configurable key bindings (always available, even when disabled)
 		const action = findAction(keyBindings, inputChar, key);
 		if (action === 'toggleMode' && onToggleMode) {
@@ -443,6 +450,10 @@ export default function UserInput({
 		}
 		if (action === 'submit') {
 			handleSubmit();
+			return;
+		}
+		if (action === 'exit' && onExit) {
+			onExit();
 			return;
 		}
 

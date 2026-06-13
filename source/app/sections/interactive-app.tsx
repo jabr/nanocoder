@@ -8,10 +8,8 @@ import {IdeSelector} from '@/components/ide-selector';
 import type {useChatHandler} from '@/hooks/chat-handler';
 import type {AppHandlers} from '@/hooks/useAppHandlers';
 import type {useAppState} from '@/hooks/useAppState';
-import {useKeyBindings} from '@/hooks/useKeyBindings';
 import type {useModeHandlers} from '@/hooks/useModeHandlers';
 import type {useVSCodeServer} from '@/hooks/useVSCodeServer';
-import {findAction} from '@/utils/key-binding';
 import type {PendingToolApproval} from '@/utils/tool-approval-queue';
 import type {PendingToolConfirmation} from '@/utils/tool-confirm-queue';
 import {displayCompactCountsSummary} from '@/utils/tool-result-display';
@@ -111,29 +109,6 @@ export function InteractiveApp({
 		{isActive: cancellable},
 	);
 
-	const keyBindings = useKeyBindings();
-
-	// Global key binding handler for app-level actions (model selector, etc.)
-	useInput(
-		(input, key) => {
-			const action = findAction(keyBindings, input, key);
-			if (action === 'openModelSelector') {
-				modeHandlers.enterModelSelectionMode();
-			} else if (action === 'exit') {
-				onExit();
-			}
-		},
-		{
-			isActive:
-				!chatHandler.isGenerating &&
-				!appState.isToolExecuting &&
-				!appState.isToolConfirmationMode &&
-				!appState.isQuestionMode &&
-				pendingSubagentApproval === null &&
-				pendingToolConfirmation === null,
-		},
-	);
-
 	return (
 		<Box flexDirection="column" padding={1} width="100%">
 			{/* Chat History - ALWAYS rendered to keep Static content stable */}
@@ -222,6 +197,7 @@ export function InteractiveApp({
 						onDismissActiveEditor={vscodeServer.dismissActiveEditor}
 						onToggleMode={appHandlers.handleToggleDevelopmentMode}
 						onToggleReasoningExpanded={handleToggleReasoningExpanded}
+						onExit={onExit}
 						tune={appState.tune}
 						currentModel={appState.currentModel}
 					/>

@@ -74,6 +74,9 @@ export interface ChatInputProps {
 	// VS Code active editor pushed from the extension (filename + optional selection)
 	activeEditor?: ActiveEditorState | null;
 	onDismissActiveEditor?: () => void;
+
+	// Exit the application
+	onExit?: () => void;
 }
 
 /**
@@ -119,6 +122,7 @@ export function ChatInput({
 	currentModel,
 	activeEditor,
 	onDismissActiveEditor,
+	onExit,
 }: ChatInputProps): React.ReactElement {
 	const {colors} = useTheme();
 
@@ -185,6 +189,7 @@ export function ChatInput({
 					currentModel={currentModel}
 					activeEditor={activeEditor}
 					onDismissActiveEditor={onDismissActiveEditor}
+					onExit={onExit}
 				/>
 			) : /* Client Missing */
 			mcpInitialized && !client ? (

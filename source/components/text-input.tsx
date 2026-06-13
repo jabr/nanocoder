@@ -176,6 +176,28 @@ function TextInput({
 						break;
 					}
 
+					case 'd': {
+						// Forward delete: remove character after cursor
+						if (cursorOffset < originalValue.length) {
+							nextValue =
+								originalValue.slice(0, cursorOffset) +
+								originalValue.slice(cursorOffset + 1);
+						}
+						break;
+					}
+
+					case 'h':
+					case 'backspace': {
+						// Backward delete
+						if (cursorOffset > 0) {
+							nextValue =
+								originalValue.slice(0, cursorOffset - 1) +
+								originalValue.slice(cursorOffset);
+							nextCursorOffset--;
+						}
+						break;
+					}
+
 					default:
 						// Ignore all other ctrl combinations (don't insert characters)
 						break;
@@ -188,11 +210,12 @@ function TextInput({
 				if (showCursor) {
 					nextCursorOffset++;
 				}
-			} else if (key.backspace || key.delete) {
+			} else if (key.delete || key.backspace) {
+				// Backward delete (Mac "delete", backspace, ctrl+h via key.backspace)
 				if (cursorOffset > 0) {
 					nextValue =
 						originalValue.slice(0, cursorOffset - 1) +
-						originalValue.slice(cursorOffset, originalValue.length);
+						originalValue.slice(cursorOffset);
 					nextCursorOffset--;
 				}
 			} else {
