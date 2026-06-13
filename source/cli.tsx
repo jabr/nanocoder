@@ -336,6 +336,12 @@ async function main(): Promise<void> {
 		// bound during long Ink sessions. See issue #521.
 		const {installPerfBufferGuard} = await import('@/utils/perf-buffer');
 		installPerfBufferGuard();
+
+		const {loadPreferences} = await import('@/config/preferences');
+		const prefs = loadPreferences();
+		const kittyMode = prefs.kittyKeyboard ?? 'auto';
+		const kittyKeyboard = {mode: kittyMode as 'auto' | 'enabled' | 'disabled'};
+
 		render(
 			<App
 				vscodeMode={vscodeMode}
@@ -347,7 +353,7 @@ async function main(): Promise<void> {
 				cliMode={cliMode}
 				trustDirectory={trustDirectory}
 			/>,
-			{kittyKeyboard: {mode: 'enabled', flags: ['disambiguateEscapeCodes']}},
+			{kittyKeyboard},
 		);
 	}
 }

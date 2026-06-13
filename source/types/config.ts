@@ -432,4 +432,5 @@ export interface UserPreferences {
 	reasoningExpanded?: boolean;
 	compactToolDisplay?: boolean;
 	keyBindings?: KeyBindings;
+	kittyKeyboard?: 'auto' | 'enabled' | 'disabled';
 }
