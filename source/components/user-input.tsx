@@ -448,10 +448,6 @@ export default function UserInput({
 			onToggleReasoningExpanded();
 			return;
 		}
-		if (action === 'submit') {
-			handleSubmit();
-			return;
-		}
 		if (action === 'exit' && onExit) {
 			onExit();
 			return;
@@ -459,6 +455,11 @@ export default function UserInput({
 
 		// Block all other input when disabled
 		if (disabled) {
+			return;
+		}
+
+		if (action === 'submit') {
+			handleSubmit();
 			return;
 		}
 
