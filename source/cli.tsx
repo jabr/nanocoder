@@ -347,6 +347,7 @@ async function main(): Promise<void> {
 				cliMode={cliMode}
 				trustDirectory={trustDirectory}
 			/>,
+			{kittyKeyboard: {mode: 'enabled', flags: ['disambiguateEscapeCodes']}},
 		);
 	}
 }

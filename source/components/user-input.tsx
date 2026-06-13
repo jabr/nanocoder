@@ -5,6 +5,7 @@ import {commandRegistry} from '@/commands';
 import {DevelopmentModeIndicator} from '@/components/development-mode-indicator';
 import TextInput from '@/components/text-input';
 import {useInputState} from '@/hooks/useInputState';
+import {useKeyBindings} from '@/hooks/useKeyBindings';
 import {useResponsiveTerminal} from '@/hooks/useTerminalWidth';
 import {useTheme} from '@/hooks/useTheme';
 import {useUIStateContext} from '@/hooks/useUIState';
@@ -17,6 +18,7 @@ import {
 	getCurrentFileMention,
 	getFileCompletions,
 } from '@/utils/file-autocomplete';
+import {findAction} from '@/utils/key-binding';
 import {handleFileMention} from '@/utils/file-mention-handler';
 import {assemblePrompt} from '@/utils/prompt-processor';
 import type {ActiveEditorState} from '@/vscode/vscode-server';
@@ -62,6 +64,7 @@ export default function UserInput({
 }: ChatProps) {
 	const {isFocused, focus} = useFocus({autoFocus: !disabled, id: 'user-input'});
 	const {colors} = useTheme();
+	const keyBindings = useKeyBindings();
 	const inputState = useInputState();
 	const uiState = useUIStateContext();
 	const {boxWidth, isNarrow} = useResponsiveTerminal();
@@ -375,37 +378,10 @@ export default function UserInput({
 			return;
 		}
 
-		// Handle shift+tab to toggle development mode (always available)
-		if (key.tab && key.shift && onToggleMode) {
-			onToggleMode();
-			return;
-		}
-
-		// Handle ctrl+o to toggle compact tool display (always available)
-		if (key.ctrl && inputChar === 'o' && onToggleCompactDisplay) {
-			onToggleCompactDisplay();
-			return;
-		}
-
-		// Handle ctrl+r to toggle expanded reasoning traces (always available)
-		if (key.ctrl && inputChar === 'r' && onToggleReasoningExpanded) {
-			onToggleReasoningExpanded();
-			return;
-		}
-
-		// Block all other input when disabled
-		if (disabled) {
-			return;
-		}
-
-		// Handle special keys
-		if (key.escape) {
-			handleEscape();
-			return;
-		}
-
-		// Handle Tab key
-		if (key.tab) {
+		// Handle Tab key: autocomplete takes priority over configurable bindings.
+		// If tab autocomplete can consume the event, it does; otherwise the event
+		// falls through to the configurable key-binding handler below.
+		if (key.tab && !key.shift) {
 			// File autocomplete takes priority
 			if (isFileAutocompleteMode) {
 				void handleFileSelection();
@@ -446,6 +422,32 @@ export default function UserInput({
 			}
 		}
 
+		// Check configurable key bindings (always available, even when disabled)
+		const action = findAction(keyBindings, inputChar, key);
+		if (action === 'toggleMode' && onToggleMode) {
+			onToggleMode();
+			return;
+		}
+		if (action === 'toggleCompactDisplay' && onToggleCompactDisplay) {
+			onToggleCompactDisplay();
+			return;
+		}
+		if (action === 'toggleReasoningExpanded' && onToggleReasoningExpanded) {
+			onToggleReasoningExpanded();
+			return;
+		}
+
+		// Block all other input when disabled
+		if (disabled) {
+			return;
+		}
+
+		// Handle special keys
+		if (key.escape) {
+			handleEscape();
+			return;
+		}
+
 		// Space exits file autocomplete mode
 		if (inputChar === ' ' && isFileAutocompleteMode) {
 			setIsFileAutocompleteMode(false);
@@ -458,19 +460,19 @@ export default function UserInput({
 			focus('user-input');
 		}
 
-		// Handle return keys for multiline input
-		// Ctrl+J is the official newline shortcut and reliably sends a literal LF
-		if (
-			(key.ctrl && inputChar === 'j') ||
-			(inputChar === '\n' && !key.return)
-		) {
-			updateInput(input + '\n');
+		// Newline bindings: insert a newline character at cursor position
+		if (action === 'newline' || action === 'newlineAlt') {
+			updateInput(input + '\n', {skipPasteDetection: true});
 			return;
 		}
-
-		// Support Shift+Enter if the terminal sends it properly
-		if (key.return && key.shift) {
-			updateInput(input + '\n');
+		// Also handle literal LF character (some terminals send this for Ctrl+J)
+		if (inputChar === '\n' && !key.return) {
+			updateInput(input + '\n', {skipPasteDetection: true});
+			return;
+		}
+		// Fallback: shift+enter always inserts newline if not bound to any action
+		if (action === null && key.shift && key.return) {
+			updateInput(input + '\n', {skipPasteDetection: true});
 			return;
 		}
 

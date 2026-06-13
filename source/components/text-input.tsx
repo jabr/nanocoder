@@ -1,6 +1,8 @@
 import chalk from 'chalk';
 import {Text, useInput} from 'ink';
 import {useEffect, useState} from 'react';
+import {useKeyBindings} from '@/hooks/useKeyBindings';
+import {findAction} from '@/utils/key-binding';
 import {wrapWithTrimmedContinuations} from '@/utils/text-wrapping';
 
 export type Props = {
@@ -26,6 +28,7 @@ function TextInput({
 	onSubmit,
 	wrapWidth,
 }: Props) {
+	const keyBindings = useKeyBindings();
 	const [state, setState] = useState({
 		cursorOffset: (originalValue || '').length,
 		cursorWidth: 0,
@@ -41,7 +44,7 @@ function TextInput({
 
 			const newValue = originalValue || '';
 
-			if (previousState.cursorOffset > newValue.length - 1) {
+			if (newValue.endsWith('\n') || previousState.cursorOffset >= newValue.length) {
 				return {
 					cursorOffset: newValue.length,
 					cursorWidth: 0,
@@ -88,16 +91,25 @@ function TextInput({
 				key.downArrow ||
 				(key.ctrl && input === 'c') ||
 				key.tab ||
-				(key.shift && key.tab)
+				(key.shift && key.tab) ||
+				(key.shift && key.return)
 			) {
 				return;
 			}
 
-			if (key.return) {
+			const action = findAction(keyBindings, input, key);
+			if (action === 'submit') {
 				if (onSubmit) {
 					onSubmit(originalValue);
 				}
 
+				return;
+			}
+
+			// If findAction matched any other configured binding (newline,
+			// toggleMode, etc.), let UserInput's handler own it — don't
+			// process the key here.
+			if (action !== null) {
 				return;
 			}
 

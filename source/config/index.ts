@@ -19,10 +19,12 @@ import type {
 	Colors,
 	CompressionMode,
 	CompressionStrategy,
+	KeyBindings,
 	NotificationsConfig,
 	PasteConfig,
 	SystemPromptConfig,
 } from '@/types/index';
+import {DEFAULT_KEY_BINDINGS} from '@/types/config';
 import {logError} from '@/utils/message-queue';
 import {DEFAULT_SINGLE_LINE_PASTE_THRESHOLD} from '@/utils/paste-utils';
 
@@ -330,6 +332,18 @@ function loadPasteConfig(): PasteConfig {
 	);
 }
 
+function loadKeyBindings(): Required<KeyBindings> {
+	return (
+		loadHierarchicalConfig('nanocoder-preferences.json', 'keyBindings', config => {
+			const bindings = config.nanocoder?.keyBindings;
+			if (bindings && typeof bindings === 'object') {
+				return {...DEFAULT_KEY_BINDINGS, ...bindings};
+			}
+			return null;
+		}) ?? DEFAULT_KEY_BINDINGS
+	);
+}
+
 function loadNanocoderToolsConfig(): AppConfig['nanocoderTools'] {
 	return (
 		loadHierarchicalConfig('agents.config.json', 'nanocoderTools', config => {
@@ -439,6 +453,9 @@ function loadAppConfig(): AppConfig {
 	// Load paste configuration
 	const paste = loadPasteConfig();
 
+	// Load key bindings configuration
+	const keyBindings = loadKeyBindings();
+
 	// Load nanocoder tools configuration
 	const nanocoderTools = loadNanocoderToolsConfig();
 
@@ -461,6 +478,7 @@ function loadAppConfig(): AppConfig {
 		sessions,
 		headless,
 		paste,
+		keyBindings,
 		nanocoderTools,
 		alwaysAllow,
 		disabledTools,

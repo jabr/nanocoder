@@ -1,7 +1,8 @@
 import {readFileSync, writeFileSync} from 'fs';
 import type {TitleShape} from '@/components/ui/styled-title';
 import {getClosestConfigFile} from '@/config/index';
-import type {TuneConfig} from '@/types/config';
+import type {KeyBindings, TuneConfig} from '@/types/config';
+import {DEFAULT_KEY_BINDINGS} from '@/types/config';
 import type {UserPreferences} from '@/types/index';
 import type {NanocoderShape, ThemePreset} from '@/types/ui';
 import {logError} from '@/utils/message-queue';
@@ -173,5 +174,17 @@ export function getCompactToolDisplay(): boolean {
 export function updateCompactToolDisplay(value: boolean): void {
 	const preferences = loadPreferences();
 	preferences.compactToolDisplay = value;
+	savePreferences(preferences);
+}
+
+export function getKeyBindings(): Required<KeyBindings> {
+	const preferences = loadPreferences();
+	const userBindings = preferences.keyBindings ?? {};
+	return {...DEFAULT_KEY_BINDINGS, ...userBindings};
+}
+
+export function updateKeyBindings(bindings: Partial<KeyBindings>): void {
+	const preferences = loadPreferences();
+	preferences.keyBindings = {...(preferences.keyBindings ?? {}), ...bindings};
 	savePreferences(preferences);
 }

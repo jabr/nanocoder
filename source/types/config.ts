@@ -213,6 +213,9 @@ export interface AppConfig {
 		// Maximum LLM turns before the loop forces a final, tool-free answer.
 		maxTurns?: number;
 	};
+
+	// Configurable key bindings for app-level actions
+	keyBindings?: Required<KeyBindings>;
 }
 
 // MCP Server configuration with source tracking
@@ -390,6 +393,28 @@ export const TUNE_DEFAULTS: TuneConfig = {
 	aggressiveCompact: false,
 };
 
+export interface KeyBindings {
+	submit?: string;
+	newline?: string;
+	newlineAlt?: string;
+	toggleMode?: string;
+	toggleCompactDisplay?: string;
+	toggleReasoningExpanded?: string;
+	openModelSelector?: string;
+	exit?: string;
+}
+
+export const DEFAULT_KEY_BINDINGS: Required<KeyBindings> = {
+	submit: 'enter',
+	newline: 'shift+enter',
+	newlineAlt: 'ctrl+j',
+	toggleMode: 'shift+tab',
+	toggleCompactDisplay: 'ctrl+o',
+	toggleReasoningExpanded: 'ctrl+r',
+	openModelSelector: '',
+	exit: '',
+};
+
 export interface UserPreferences {
 	lastProvider?: string;
 	lastModel?: string;
@@ -406,4 +431,5 @@ export interface UserPreferences {
 	paste?: PasteConfig;
 	reasoningExpanded?: boolean;
 	compactToolDisplay?: boolean;
+	keyBindings?: KeyBindings;
 }

@@ -8,8 +8,10 @@ import {IdeSelector} from '@/components/ide-selector';
 import type {useChatHandler} from '@/hooks/chat-handler';
 import type {AppHandlers} from '@/hooks/useAppHandlers';
 import type {useAppState} from '@/hooks/useAppState';
+import {useKeyBindings} from '@/hooks/useKeyBindings';
 import type {useModeHandlers} from '@/hooks/useModeHandlers';
 import type {useVSCodeServer} from '@/hooks/useVSCodeServer';
+import {findAction} from '@/utils/key-binding';
 import type {PendingToolApproval} from '@/utils/tool-approval-queue';
 import type {PendingToolConfirmation} from '@/utils/tool-confirm-queue';
 import {displayCompactCountsSummary} from '@/utils/tool-result-display';
@@ -29,6 +31,7 @@ interface InteractiveAppProps {
 	handleQuestionAnswer: (answer: string) => void;
 	handleUserSubmit: (message: string, displayValue: string) => Promise<void>;
 	handleIdeSelect: (ide: string) => void;
+	onExit: () => void;
 }
 
 /**
@@ -52,6 +55,7 @@ export function InteractiveApp({
 	handleQuestionAnswer,
 	handleUserSubmit,
 	handleIdeSelect,
+	onExit,
 }: InteractiveAppProps): React.ReactElement {
 	const handleToggleCompactDisplay = () => {
 		const expanding = appState.compactToolDisplay;
@@ -105,6 +109,29 @@ export function InteractiveApp({
 			}
 		},
 		{isActive: cancellable},
+	);
+
+	const keyBindings = useKeyBindings();
+
+	// Global key binding handler for app-level actions (model selector, etc.)
+	useInput(
+		(input, key) => {
+			const action = findAction(keyBindings, input, key);
+			if (action === 'openModelSelector') {
+				modeHandlers.enterModelSelectionMode();
+			} else if (action === 'exit') {
+				onExit();
+			}
+		},
+		{
+			isActive:
+				!chatHandler.isGenerating &&
+				!appState.isToolExecuting &&
+				!appState.isToolConfirmationMode &&
+				!appState.isQuestionMode &&
+				pendingSubagentApproval === null &&
+				pendingToolConfirmation === null,
+		},
 	);
 
 	return (
