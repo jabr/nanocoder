@@ -394,14 +394,14 @@ export const TUNE_DEFAULTS: TuneConfig = {
 };
 
 export interface KeyBindings {
-	submit?: string;
-	newline?: string;
-	newlineAlt?: string;
-	toggleMode?: string;
-	toggleCompactDisplay?: string;
-	toggleReasoningExpanded?: string;
-	openModelSelector?: string;
-	exit?: string;
+	submit?: string | string[];
+	newline?: string | string[];
+	newlineAlt?: string | string[];
+	toggleMode?: string | string[];
+	toggleCompactDisplay?: string | string[];
+	toggleReasoningExpanded?: string | string[];
+	openModelSelector?: string | string[];
+	exit?: string | string[];
 }
 
 export const DEFAULT_KEY_BINDINGS: Required<KeyBindings> = {

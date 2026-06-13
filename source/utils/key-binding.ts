@@ -100,25 +100,30 @@ export function findAction(
 	input: string,
 	key: Key,
 ): keyof KeyBindings | null {
-	// Check actions with modifier combos first (higher priority)
 	const actionKeys = Object.keys(bindings) as (keyof KeyBindings)[];
 
-	// Sort: combos with modifiers first, then plain keys
-	const sorted = actionKeys
-		.filter(action => {
-			const combo = bindings[action];
-			return combo && combo.trim() !== '';
-		})
-		.sort((a, b) => {
-			const aHasMod = bindings[a]!.includes('+') ? 1 : 0;
-			const bHasMod = bindings[b]!.includes('+') ? 1 : 0;
-			return bHasMod - aHasMod;
-		});
+	// Normalize to arrays and filter out empty bindings
+	const entries = actionKeys
+		.map(action => ({
+			action,
+			combos: Array.isArray(bindings[action])
+				? (bindings[action] as string[])
+				: [bindings[action] as string],
+		}))
+		.filter(e => e.combos.some(c => c && c.trim() !== ''));
 
-	for (const action of sorted) {
-		const combo = bindings[action]!;
-		if (matchesKey(combo, input, key)) {
-			return action;
+	// Sort: actions with modifier combos first, then plain keys
+	entries.sort((a, b) => {
+		const aHasMod = a.combos.some(c => c.includes('+')) ? 1 : 0;
+		const bHasMod = b.combos.some(c => c.includes('+')) ? 1 : 0;
+		return bHasMod - aHasMod;
+	});
+
+	for (const {action, combos} of entries) {
+		for (const combo of combos) {
+			if (combo && combo.trim() !== '' && matchesKey(combo, input, key)) {
+				return action;
+			}
 		}
 	}
 

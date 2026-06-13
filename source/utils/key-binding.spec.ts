@@ -346,3 +346,32 @@ test('DEFAULT_KEY_BINDINGS: openModelSelector defaults to empty string', t => {
 test('DEFAULT_KEY_BINDINGS: exit defaults to empty string', t => {
 	t.is(DEFAULT_KEY_BINDINGS.exit, '');
 });
+
+// --- Array binding tests ---
+
+test('findAction: matches first combo in array', t => {
+	const bindings: Required<KeyBindings> = {
+		...DEFAULT_KEY_BINDINGS,
+		submit: ['ctrl+enter', 'ctrl+m'],
+	};
+	t.is(findAction(bindings, '', mockKey({ctrl: true, return: true})), 'submit');
+	t.is(findAction(bindings, 'm', mockKey({ctrl: true})), 'submit');
+});
+
+test('findAction: matches second combo in array', t => {
+	const bindings: Required<KeyBindings> = {
+		...DEFAULT_KEY_BINDINGS,
+		newline: ['enter', 'shift+enter'],
+	};
+	t.is(findAction(bindings, '', mockKey({return: true})), 'newline');
+	t.is(findAction(bindings, '', mockKey({return: true, shift: true})), 'newline');
+});
+
+test('findAction: empty string in array is skipped', t => {
+	const bindings: Required<KeyBindings> = {
+		...DEFAULT_KEY_BINDINGS,
+		exit: ['', 'ctrl+d'],
+	};
+	t.is(findAction(bindings, 'd', mockKey({ctrl: true})), 'exit');
+	t.is(findAction(bindings, '', mockKey()), null);
+});
